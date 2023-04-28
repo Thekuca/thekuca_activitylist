@@ -29,7 +29,7 @@ AddEventHandler('thekuca_vrijeme:otvoriListu', function()
 		lib.registerContext({
 			id = 'jebemtisve',
 			menu = 'staMislis',
-			title = 'Asterix | Lista Aktivnosti',
+			title = 'Thekuca | Lista Aktivnosti',
 			options = kontekst,
 		})
 		lib.showContext('jebemtisve')
