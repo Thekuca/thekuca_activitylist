@@ -1,6 +1,6 @@
 local ESX = exports['es_extended']:getSharedObject()
 
-function konvertujSat(decimala)
+local function konvertujSat(decimala)
   local sat = math.floor(decimala)
   local minut = math.floor((decimala - sat) * 60)
   return string.format("%d:%02d", sat, minut)
@@ -27,11 +27,11 @@ AddEventHandler('thekuca_vrijeme:otvoriListu', function()
 		end
 
 		lib.registerContext({
-			id = 'jebemtisve',
+			id = 'smirise',
 			menu = 'staMislis',
 			title = 'Thekuca | Lista Aktivnosti',
 			options = kontekst,
 		})
-		lib.showContext('jebemtisve')
+		lib.showContext('smirise')
 	end)
 end)
