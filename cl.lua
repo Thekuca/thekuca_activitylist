@@ -6,8 +6,7 @@ local function konvertujSat(decimala)
   return string.format("%d:%02d", sat, minut)
 end
 
-RegisterNetEvent('thekuca_vrijeme:otvoriListu')
-AddEventHandler('thekuca_vrijeme:otvoriListu', function()
+local function otvoriListu()
 	ESX.TriggerServerCallback('thekuca_vrijeme:povuciListu', function(lista)
 		local kontekst = {}
 		for i = 1, #lista, 1 do
@@ -35,3 +34,5 @@ AddEventHandler('thekuca_vrijeme:otvoriListu', function()
 		lib.showContext('smirise')
 	end)
 end)
+
+ESX.RegisterInput('thekuca_activitylist:open', 'Open activity list', 'KEYBOARD', 'F9', false, otvoriListu)
