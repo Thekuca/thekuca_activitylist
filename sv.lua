@@ -1,5 +1,4 @@
-local ESX = exports['es_extended']:getSharedObject()
-local lista = {}
+local ESX, lista = exports['es_extended']:getSharedObject(), {}
 
 local function povuciVremena()
     local svi = MySQL.query.await('SELECT name, vrijeme FROM users WHERE vrijeme > 60')
