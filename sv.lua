@@ -11,7 +11,12 @@ local function povuciVremena()
     print('[^2thekuca_sistem^0] ^3Refreshovano^0 online vrijeme ^5igraca^0')
 end
 
-SetInterval('aktivnostigraca', 1800000, povuciVremena)
+CreateThread(function() 
+    while true do 
+        povuciVremena()
+        Wait(1800*1000)
+    end 
+end)
 
 local function updateVrijeme(id, vrijeme, ime)
     local result = MySQL.query.await("SELECT vrijeme FROM users WHERE identifier = ?", {id})
