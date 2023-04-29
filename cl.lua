@@ -33,4 +33,5 @@ local function otvoriListu()
 	end)
 end)
 
-ESX.RegisterInput('thekuca_activitylist:open', 'Open activity list', 'KEYBOARD', 'F9', false, otvoriListu)
+RegisterCommand('activitylist', otvoriListu, false)
+RegisterKeyMapping('activitylist', 'Activity List', 'KEYBOARD', 'F9')
