@@ -31,7 +31,7 @@ local function otvoriListu()
 		})
 		lib.showContext('smirise')
 	end)
-end)
+end
 
 RegisterCommand('activitylist', otvoriListu, false)
 RegisterKeyMapping('activitylist', 'Activity List', 'KEYBOARD', 'F9')
