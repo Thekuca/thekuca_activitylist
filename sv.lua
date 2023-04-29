@@ -15,7 +15,7 @@ SetInterval('aktivnostigraca', 1800000, povuciVremena)
 
 local function updateVrijeme(id, vrijeme, ime)
     local result = MySQL.query.await("SELECT vrijeme FROM users WHERE identifier = ?", {id})
-    local ubaci = result == 0 and result[1].vrijeme or vrijeme + result[1].vrijeme
+    local ubaci = result[1].vrijeme == 0 and vrijeme or vrijeme + result[1].vrijeme
     local query = MySQL.update.await("UPDATE users SET vrijeme = ? WHERE identifier = ?", {ubaci, id})
     if not query then return print('greska tokom ubacivanja vremena') end
     for i = 1, #lista, 1 do
