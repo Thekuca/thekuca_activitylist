@@ -1,8 +1,8 @@
 ThekucaAktivnost = setmetatable({
-    KonvertujSat = function(d)
-        return string.format("%d:%02d", math.floor(d), math.floor((d - math.floor(d)) * 60))
-    end,
-    TrenutnaLista = {},
+	KonvertujSat = function(d)
+		return string.format("%d:%02d", math.floor(d), math.floor((d - math.floor(d)) * 60))
+	end,
+	TrenutnaLista = {},
 	NoveOpcije = false
 }, {
 	__call = function()
@@ -13,8 +13,8 @@ ThekucaAktivnost = setmetatable({
 
 		lib.showContext('lista')
 	end,
-    __newindex = function(self, k, v)
-        if k == 'TrenutnaLista' then
+	__newindex = function(self, k, v)
+		if k == 'TrenutnaLista' then
 			local opcije = {}
 			for k2, v2 in pairs(v) do
 				opcije[k2]= {
@@ -27,12 +27,12 @@ ThekucaAktivnost = setmetatable({
 				}
 			end
 			self.NoveOpcije = opcije
-        end
-    end
+		end
+	end
 })
 
 AddEventHandler('thekuca_activitylist/UpdateList', function(lista)
-    ThekucaAktivnost.TrenutnaLista = lista
+	ThekucaAktivnost.TrenutnaLista = lista
 end)
 
 RegisterCommand('activitylist', ThekucaAktivnost, false)
