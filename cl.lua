@@ -12,7 +12,7 @@ ThekucaAktivnost = setmetatable({
 		end
 
 		lib.showContext('lista')
-	end
+	end,
     __newindex = function(self, k, v)
         if k == 'TrenutnaLista' then
 			local opcije = {}
