@@ -53,6 +53,7 @@ end)
 
 AddEventHandler('esx:playerLoaded', function(_, obj)
     obj.setMeta('Aktivnost', 'Ulazak', os.time())
+    obj.triggerEvent('thekuca_activitylist/UpdateList', ThekucaAktivnost.ListaAktivnosti)
 end)
 
 AddEventHandler('playerDropped', function()
