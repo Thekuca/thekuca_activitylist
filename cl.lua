@@ -1,37 +1,39 @@
-local ESX = exports['es_extended']:getSharedObject()
-
-local function konvertujSat(decimala)
-  local sat = math.floor(decimala)
-  local minut = math.floor((decimala - sat) * 60)
-  return string.format("%d:%02d", sat, minut)
-end
-
-local function otvoriListu()
-	ESX.TriggerServerCallback('thekuca_vrijeme:povuciListu', function(lista)
-		local kontekst = {}
-		for i = 1, #lista, 1 do
-			table.sort(lista, function(a, b) return tonumber(a.vrijeme) > tonumber(b.vrijeme) end)
-			local tempBroj = lista[i].vrijeme / 60
-			local vrijemeSati = konvertujSat(math.floor(tempBroj * 10) / 10)
-			kontekst[i] = {
-				title = '🙍‍♂🙍 | Igrac: ' .. lista[i].name,
-				description = '🔢 | Pozicija: ' .. i,
-				metadata = {
-					'⭐ | Sati: ' .. vrijemeSati,
-					'⭐ | Minute: ' .. lista[i].vrijeme,
-				}
-			}
+ThekucaAktivnost = setmetatable({
+    KonvertujSat = function(d)
+        return string.format("%d:%02d", math.floor(d), math.floor((d - math.floor(d)) * 60))
+    end,
+    TrenutnaLista = {},
+	NoveOpcije = false
+}, {
+	__call = function()
+		if ThekucaAktivnost.NoveOpcije then
+			lib.registerContext({id = 'lista', menu = 'aktivnost', title = 'Thekuca | Lista Aktivnosti', options = ThekucaAktivnost.NoveOpcije})
+			ThekucaAktivnost.NoveOpcije = false
 		end
 
-		lib.registerContext({
-			id = 'smirise',
-			menu = 'staMislis',
-			title = 'Thekuca | Lista Aktivnosti',
-			options = kontekst,
-		})
-		lib.showContext('smirise')
-	end)
-end
+		lib.showContext('lista')
+	end
+    __newindex = function(self, k, v)
+        if k == 'TrenutnaLista' then
+			local opcije = {}
+			for k2, v2 in pairs(v) do
+				opcije[k2]= {
+					title = ('🙍‍♂🙍 | Igrac: %s'):format(v2.ime),
+					description = ('🔢 | Pozicija: %s'):format(k2),
+					metadata = {
+						('⭐ | Sati: %s'):format(self.KonvertujSat(math.floor((v2.vrijeme/60) * 10) / 10)),
+						('⭐ | Minute: %s'):format(v2.vrijeme),
+					}
+				}
+			end
+			self.NoveOpcije = opcije
+        end
+    end
+})
 
-RegisterCommand('activitylist', otvoriListu, false)
+AddEventHandler('thekuca_activitylist/UpdateList', function(lista)
+    ThekucaAktivnost.TrenutnaLista = lista
+end)
+
+RegisterCommand('activitylist', ThekucaAktivnost, false)
 RegisterKeyMapping('activitylist', 'Activity List', 'KEYBOARD', 'F9')
