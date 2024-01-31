@@ -1,74 +1,69 @@
-local ESX, lista = exports['es_extended']:getSharedObject(), {}
+ThekucaAktivnost = {
+    ListaAktivnosti = {},
+    PrviPut = function(src)
+        local xPlayer = ESX.GetPlayerFromId(src)
+        local meta = xPlayer.getMeta('Aktivnost', 'Ukupno')
 
-local function povuciVremena()
-    local svi = MySQL.query.await('SELECT name, vrijeme FROM users WHERE vrijeme > 60')
-    if not svi then
-        print('pronadeno 0 karaktera za povuci vrijeme')
-        lista = {}
-        return
+        if not meta then
+            xPlayer.setMeta('Aktivnost', 'Ukupno', 0)
+            return 0
+        end
+
+        return meta
     end
-    lista = svi
-    print('[^2thekuca_sistem^0] ^3Refreshovano^0 online vrijeme ^5igraca^0')
-end
+}
 
-CreateThread(function() 
-    while true do 
-        povuciVremena()
-        Wait(1800*1000)
-    end 
-end)
+setmetatable(ThekucaAktivnost.ListaAktivnosti, {
+    __call = function()
+        for i = 1, #ThekucaAktivnost.ListaAktivnosti do
+            table.sort(ThekucaAktivnost.ListaAktivnosti, function(a, b)
+                return tonumber(a.vrijeme) > tonumber(b.vrijeme)
+            end)
+        end
 
-local function updateVrijeme(id, vrijeme, ime)
-    local result = MySQL.query.await("SELECT vrijeme FROM users WHERE identifier = ?", {id})
-    local ubaci = result[1].vrijeme == 0 and vrijeme or vrijeme + result[1].vrijeme
-    local query = MySQL.update.await("UPDATE users SET vrijeme = ? WHERE identifier = ?", {ubaci, id})
-    if not query then return print('greska tokom ubacivanja vremena') end
-    for i = 1, #lista, 1 do
-        if lista[i].name == ime then
-            lista[i].vrijeme = ubaci
-            break
+        TriggerClientEvent('thekuca_activitylist/UpdateList', -1, ThekucaAktivnost.ListaAktivnosti)
+        collectgarbage('collect')
+    end,
+
+    __newindex = function(self, k, v)
+        rawset(self, k, v)
+        if not v.ignore then
+            self()
         end
     end
-end
+})
 
-AddEventHandler('esx:playerLoaded', function(source)
-    Player(source).state.ulazak = os.time()
+CreateThread(function()
+    for _, xPlayer in pairs(ESX.GetExtendedPlayers()) do
+        ThekucaAktivnost.ListaAktivnosti[#ThekucaAktivnost.ListaAktivnosti+1] = {
+            ime = GetPlayerName(xPlayer.source),
+            vrijeme = ThekucaAktivnost.PrviPut(xPlayer.source),
+            ignore = true
+        }
+    end
+    ThekucaAktivnost.ListaAktivnosti()
+end)
+
+CreateThread(function()
+    while true do
+        Wait(300*1000) -- 5 minutes update time
+        ThekucaAktivnost.ListaAktivnosti()
+    end
+end)
+
+AddEventHandler('esx:playerLoaded', function(_, obj)
+    obj.setMeta('Aktivnost', 'Ulazak', os.time())
 end)
 
 AddEventHandler('playerDropped', function()
-    local igrac = Player(source).state
-    igrac.izlazak = os.time()
-    updateVrijeme(ESX.GetPlayerFromId(source).identifier, math.floor(os.difftime(igrac.izlazak, igrac.ulazak)/60), GetPlayerName(source))
-end)
+    local xPlayer = ESX.GetPlayerFromId(source)
+    if not xPlayer then return end
 
-RegisterCommand("resetujvrijeme", function(source, args, rawCommand)
-    local state = Player(source).state
-    if state.group ~= 'vlasnik' and state.group ~= 'developer' then
-        return
-    end
-    if not state.duznost then
-        return
-    end
-    local querySvi = 'SELECT * FROM users WHERE vrijeme != 0'
-    local queryUpdejtuj = 'UPDATE users SET vrijeme = ? WHERE identifier = ?'
-    MySQL.query(querySvi, function(povraceno)
-        if not povraceno then return end
-        for i = 1, #povraceno, 1 do
-            local val = povraceno[i]
-            local mozes = MySQL.update.await(queryUpdejtuj, {0, val.identifier})
-            if not mozes then print('greska tokom reseta vremena') end
-        end
-    end)
-    print('USPJESNO RESETIRANO VRIJEME SVIM IGRACIMA')
-end, false)
+    local vrijemeUlaska, vrijemeUkupno = xPlayer.getMeta('Aktivnost', 'Ulazak'), ThekucaAktivnost.PrviPut(source)
+    local diff = math.floor(os.difftime(os.time(), vrijemeUlaska)/60)
 
-RegisterCommand('refreshujlistu', function(source, args, rawCommand)
-    local state = Player(source).state
-    if state.group ~= 'vlasnik' and state.group ~= 'developer' then return end
-    if not state.duznost then return end
-    povuciVremena()
-end, false)
+    xPlayer.clearMeta('Aktivnost', 'Ulazak')
+    xPlayer.setMeta('Aktivnost', 'Ukupno', vrijemeUkupno + diff)
 
-ESX.RegisterServerCallback('thekuca_vrijeme:povuciListu', function(a, fnc)
-    fnc(lista)
+    ThekucaAktivnost.ListaAktivnosti[#ThekucaAktivnost.ListaAktivnosti+1] = {ime = GetPlayerName(source), vrijeme = vrijemeUkupno + diff, ignore = false}
 end)
