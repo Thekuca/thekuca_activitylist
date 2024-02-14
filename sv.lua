@@ -15,11 +15,9 @@ ThekucaAktivnost = {
 
 setmetatable(ThekucaAktivnost.ListaAktivnosti, {
     __call = function()
-        for i = 1, #ThekucaAktivnost.ListaAktivnosti do
-            table.sort(ThekucaAktivnost.ListaAktivnosti, function(a, b)
-                return tonumber(a.vrijeme) > tonumber(b.vrijeme)
-            end)
-        end
+        table.sort(ThekucaAktivnost.ListaAktivnosti, function(a, b)
+            return tonumber(a.vrijeme) > tonumber(b.vrijeme)
+        end)
 
         TriggerClientEvent('thekuca_activitylist/UpdateList', -1, ThekucaAktivnost.ListaAktivnosti)
         collectgarbage('collect')
